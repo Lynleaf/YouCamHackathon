@@ -23,7 +23,7 @@ const HomeScreen = ({ navigation }) => {
                 {({ pressed }) => (
                     
                     <Text>
-                        Analyze
+                        hjkhjk
                     </Text>
                 )}
             </Pressable>

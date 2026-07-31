@@ -1,32 +1,42 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, useWindowDimensions } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {styles} from "./styles";
+import ImageUploadBox from './components/ImageUploadBox'
 
 const AnalysisScreen = ({ navigation }) => {
-    const { width } = useWindowDimensions();
-    const squareSize = width*.7;
+    const { width,height } = useWindowDimensions();
+    const appWidth = width*.8;
 
     return (
-        <View style={styles.container}>
+        
+        <SafeAreaView style={styles.container}>
             <View style={styles.heading}>
                 <Text style={styles.headingText}>
-                    Color Analysis
+                    Upload your
+                </Text>
+                <Text style={styles.headingItalicsText}>
+                    image
                 </Text>
             </View>
             <View style={styles.container}>
-                <View style={[styles.imageBox, {width:squareSize,height:squareSize}]}>
+                <ImageUploadBox width={appWidth} height={height*.5} 
+                onImageSaved={(uri)=>{navigation.navigate("MainTabs", {screen: "Home"});}}/>
+                    
+                <Pressable
+                    onPress={() => {
+                    navigation.navigate("MainTabs", {screen: "Home"});
+                    }}
+                    style = {[styles.button,{width:appWidth,height:height*.06}]}
+                >
                     <Text>
-                        Drop image here
+                        Back to home
                     </Text>
-                </View>
-                <View style={[styles.imageBox, {width:squareSize,height:squareSize}]}>
-                    <Text>
-                        Drop image here
-                    </Text>
-                </View>
+                    
+                </Pressable>
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 

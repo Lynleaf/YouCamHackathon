@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
+import ImageUploadBox from './components/ImageUploadBox'
 
 const TempScreen = ({ navigation }) => {
 
@@ -9,6 +10,9 @@ const TempScreen = ({ navigation }) => {
             <Text>
                 Temp screen
             </Text>
+            <ImageUploadBox>
+
+            </ImageUploadBox>
         </View>
     );
 };
