@@ -23,18 +23,6 @@ const AnalysisScreen = ({ navigation }) => {
             <View style={styles.container}>
                 <ImageUploadBox width={appWidth} height={height*.5} 
                 onImageSaved={(uri)=>{navigation.navigate("MainTabs", {screen: "Home"});}}/>
-                    
-                <Pressable
-                    onPress={() => {
-                    navigation.navigate("MainTabs", {screen: "Home"});
-                    }}
-                    style = {[styles.button,{width:appWidth,height:height*.06}]}
-                >
-                    <Text>
-                        Back to home
-                    </Text>
-                    
-                </Pressable>
             </View>
         </SafeAreaView>
     );

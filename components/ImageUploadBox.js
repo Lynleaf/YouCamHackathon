@@ -36,33 +36,25 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
         try {
             setSaving(true);
             // Create permanent location
-            const filename =
-                "profileImage.jpg";
-            const permanentUri =
-                FileSystem.documentDirectory + filename;
-            // Copy image into app storage
-            await FileSystem.copyAsync({
-                from: uri,
-                to: permanentUri,
-            });
+            const permanentUri =FileSystem.documentDirectory + "profileImage.jpg";
+          
+            // Check if an old profile image exists 
+            const oldImage = await FileSystem.getInfoAsync(permanentUri); 
+            // Delete the old image if it exists 
+            if (oldImage.exists) { await FileSystem.deleteAsync(permanentUri); }
+
+            // Copy the new image into the same location 
+            await FileSystem.copyAsync({ from: uri, to: permanentUri, });
+            
             // Save location
-            await AsyncStorage.setItem(
-                "profileImage",
-                permanentUri
-            );
-            console.log(
-                "Saved profile image:",
-                permanentUri
-            );
+            await AsyncStorage.setItem("profileImage",permanentUri);
+            console.log("Saved profile image:",permanentUri);
             if (onImageSaved) {
                 onImageSaved(permanentUri);
             }
         } catch(error) {
             console.log(error);
-            Alert.alert(
-                "Error",
-                "Could not save image"
-            );
+            Alert.alert("Error","Could not save image");
         } finally {
             setSaving(false);
         }
@@ -82,7 +74,7 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
 
       {imageUri && (
         <TouchableOpacity 
-          style={[styles.button, {width},saving && styles.buttonDisabled]} 
+          style={[styles.button,{width},saving && styles.buttonDisabled]} 
           onPress={() => saveImage(imageUri)}
           disabled={saving}
         >

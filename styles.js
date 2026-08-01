@@ -3,11 +3,22 @@ import { StyleSheet } from "react-native";
 import { Alef_400Regular,Alef_700Bold } from '@expo-google-fonts/alef'
 
 export const styles = StyleSheet.create({
+    scrollContainer:{
+        flex:1,
+        backgroundColor: '#22223b',
+        alignSelf: 'center',
+        width: '100%'
+    },
+    scrollContent:{
+        padding: 20,
+        alignItems: 'center',
+        backgroundColor: '#22223b',
+    },
 	container: {
 		justifyContent: 'center',
         backgroundColor: '#22223b',
-        flex:1,
         alignItems: 'center',
+        flex:1,
 	},
     heading:{
         backgroundColor: '#22223b',
@@ -30,9 +41,12 @@ export const styles = StyleSheet.create({
 	button: {
         backgroundColor: '#9a8c98',
         borderRadius: 8,
-        margin: 20
+        marginVertical: 20,
     },
     buttonPressed: {
         opacity: 0.7,
     },
+    profileImage: {
+        width:'100%',
+    }
 });
