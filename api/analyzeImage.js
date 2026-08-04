@@ -4,6 +4,8 @@ const BASE_URL = "https://yce-api-01.makeupar.com";
 import { File } from "expo-file-system";
 import { Blob } from "expo-blob";
 
+import { faceAnalysisErrors } from "../utils/faceAnalysisErrors";
+
 // Main function called to analyze image for colors
 export async function analyzeImage(uri) {
     console.log("Image URI:", uri);
@@ -145,7 +147,8 @@ async function pollAnalysisTask(taskId) {
             return data.data.results;
         }
         if (data.data.task_status === "error") {
-            throw new Error(JSON.stringify(data));
+            const errorCode = data.data.error_code;
+            throw new Error(faceAnalysisErrors[errorCode] || "Unable to analyze this photo. Please try another image.");
         }
         // wait 1 second before checking again
         await new Promise(resolve => setTimeout(resolve, 1000));

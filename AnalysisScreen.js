@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, useWindowDimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, useWindowDimensions, Alert } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {styles} from "./styles";
@@ -34,29 +34,12 @@ const AnalysisScreen = ({ navigation }) => {
                         analysis.color.skin_color
                     );
                     console.log("Season is: ",season);
-                    /*
-                    const season = determineSeason(
-                        response.hair,
-                        response.eyes,
-                        response.skin
-                    );
                     
-                    const testResponse = {
-                        hair: "#4B2E2B",
-                        eyes: "#4F6B45",
-                        skin: "#F2C8A5"
-                    };
-                    const season = determineSeason(
-                        testResponse.hair,
-                        testResponse.eyes,
-                        testResponse.skin
-                    );
-                    console.log(season);
-                    console.log("UPLOAD RESPONSE:", data);*/
                     navigation.navigate("MainTabs", {screen: "Home"});
                     }
                     catch(err){
                         console.error(err);
+                        Alert.alert("Photo Analysis Failed",err.message);
                     }
                 }}/>
             </View>
