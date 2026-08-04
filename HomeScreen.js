@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { styles } from "./styles";
 
+
 const HomeScreen = ({ navigation }) => {
     const { width,height } = useWindowDimensions();
     const appWidth = width*.8;
@@ -52,6 +53,7 @@ const HomeScreen = ({ navigation }) => {
             ) : (
                 <Text>No profile image saved</Text>
             )}
+
             <Text>
                 Filler information, put information about color season and examples of color palettes. Could put images of examples.
             </Text>
