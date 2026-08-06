@@ -3,8 +3,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import HomeScreen from './HomeScreen';
-import TempScreen from './TempScreen';
+import PaletteScreen from './PaletteScreen';
 import AnalysisScreen from './AnalysisScreen';
+import TryOnScreen from './TryOnScreen';
+import LooksScreen from './LooksScreen';
 
 import { useFonts } from "expo-font";
 import {
@@ -25,8 +27,16 @@ function TabNavigator() {
         component={HomeScreen}
       />
       <Tab.Screen
-        name="Temp"
-        component={TempScreen}
+        name="Looks"
+        component={LooksScreen}
+      />
+      <Tab.Screen
+        name="Try-On"
+        component={TryOnScreen}
+      />
+      <Tab.Screen
+        name="Full Palette"
+        component={PaletteScreen}
       />
     </Tab.Navigator>
   );

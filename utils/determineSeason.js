@@ -183,13 +183,3 @@ function determineSeason(hairHex, eyeHex, skinHex) {
 }
 
 export default determineSeason;
-
-/*console.log(
-  determineSeason(
-    "#3B2416",
-    "#5B7348",
-    "#E8C4A6"
-  )
-);
-
-// "True Autumn"*/ 

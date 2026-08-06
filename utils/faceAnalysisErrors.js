@@ -1,4 +1,7 @@
 export const faceAnalysisErrors = {
+    error_no_face:
+        "No face found. Please upload an image of your face.",
+        
     error_below_min_image_size:
         "Your photo is too small. Please upload an image that is at least 320 pixels wide.",
 

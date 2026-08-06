@@ -37,16 +37,35 @@ export const styles = StyleSheet.create({
         color: '#9a8c98',
         fontSize: 28,
         fontFamily: "Alef_700Bold",
+        
     },
 	button: {
         backgroundColor: '#9a8c98',
         borderRadius: 8,
         marginVertical: 20,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     buttonPressed: {
         opacity: 0.7,
+        height: 40
     },
     profileImage: {
         width:'100%',
+    },
+    bodyTextLarge: {
+        color: '#9a8c98',
+        fontSize: 20,
+        fontWeight: "600",
+    },
+    bodyTextMed: {
+        color: '#9a8c98',
+        fontSize: 16,
     }
 });

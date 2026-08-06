@@ -1,12 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Alert, ActivityIndicator,useWindowDimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from "expo-file-system/legacy";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+
+import {styles as globalStyles} from "../styles";
 
 export default function ImageUploadBox({ width, height,onImageSaved }) {
   const [imageUri, setImageUri] = useState(null);
   const [saving, setSaving] = useState(false);
+  const previousImage = useRef(null);
+
+  //load saved previous image
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadPreviousImage = async () => {
+        const savedImage = await AsyncStorage.getItem("profileImage");
+
+        if (savedImage) {
+          setImageUri(`${savedImage}?t=${Date.now()}`);
+          previousImage.current = savedImage;
+        }
+      };
+
+      loadPreviousImage();
+
+    }, [])
+  );
 
   //Pick image from gallery
   const pickImage = async () => {
@@ -24,41 +45,54 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
       quality: 1,
     });
 
-    // Extract the URI safely out of the assets structure
     if (!result.canceled && result.assets && result.assets.length > 0) {
-        const selectedUri = result.assets[0].uri;
+      const selectedUri = result.assets[0].uri;
+
+      // remember the old valid photo
+      previousImage.current = imageUri;
+
+      // show new photo temporarily
       setImageUri(selectedUri);
     }
   };
 
-  //Save image to app's local storage
+  //Saves image temporarily (before it is successfully analyzed)
   const saveImage = async (uri) => {
-        try {
-            setSaving(true);
-            // Create permanent location
-            const permanentUri =FileSystem.documentDirectory + "profileImage.jpg";
-          
-            // Check if an old profile image exists 
-            const oldImage = await FileSystem.getInfoAsync(permanentUri); 
-            // Delete the old image if it exists 
-            if (oldImage.exists) { await FileSystem.deleteAsync(permanentUri); }
+    try {
+        setSaving(true);
 
-            // Copy the new image into the same location 
-            await FileSystem.copyAsync({ from: uri, to: permanentUri, });
-            
-            // Save location
-            await AsyncStorage.setItem("profileImage",permanentUri);
-            console.log("Saved profile image:",permanentUri);
-            if (onImageSaved) {
-                onImageSaved(permanentUri);
-            }
-        } catch(error) {
-            console.log(error);
-            Alert.alert("Error","Could not save image");
-        } finally {
-            setSaving(false);
+        const temporaryUri =
+            FileSystem.documentDirectory + `temp_${Date.now()}.jpg`;
+
+        await FileSystem.copyAsync({
+            from: uri,
+            to: temporaryUri,
+        });
+
+        console.log("Temporary image:", temporaryUri);
+
+        if (onImageSaved) {
+            onImageSaved(
+                temporaryUri,
+                restorePreviousImage
+            );
         }
-    };
+
+    } catch(error) {
+        console.log(error);
+        Alert.alert("Error", "Could not save image");
+    } finally {
+        setSaving(false);
+    }
+};
+
+  //restores previous successfully analyzed image
+  const restorePreviousImage = () => {
+    if (previousImage.current) {
+      setImageUri(previousImage.current);
+    }
+  };
+
   
   return (
     <View style={styles.container}>
@@ -74,14 +108,14 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
 
       {imageUri && (
         <TouchableOpacity 
-          style={[styles.button,{width},saving && styles.buttonDisabled]} 
+          style={[globalStyles.button,{width},saving && styles.buttonDisabled]} 
           onPress={() => saveImage(imageUri)}
           disabled={saving}
         >
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Save Image</Text>
+            <Text style={globalStyles.buttonText}>Save Image</Text>
           )}
         </TouchableOpacity>
       )}
@@ -119,18 +153,8 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  button: {
-    backgroundColor: '#9a8c98',
-    borderRadius: 8,
-    margin: 20,
-    height: 40
-  },
   buttonDisabled: {
     backgroundColor: '#a0c4ff',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+ 
 });

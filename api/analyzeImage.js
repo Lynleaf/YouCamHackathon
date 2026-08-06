@@ -147,7 +147,7 @@ async function pollAnalysisTask(taskId) {
             return data.data.results;
         }
         if (data.data.task_status === "error") {
-            const errorCode = data.data.error_code;
+            const errorCode = data.data.error;
             throw new Error(faceAnalysisErrors[errorCode] || "Unable to analyze this photo. Please try another image.");
         }
         // wait 1 second before checking again

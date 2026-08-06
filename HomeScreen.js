@@ -4,6 +4,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { styles } from "./styles";
 
+import ColorPalette from "./components/ColorPalette";
+import { seasonPalettes, getSeasonKey } from './utils/seasonPalettesData';
 
 const HomeScreen = ({ navigation }) => {
     const { width,height } = useWindowDimensions();
@@ -11,6 +13,7 @@ const HomeScreen = ({ navigation }) => {
 
     const [imageUri, setImageUri] = useState(null);
     const [imageAspectRatio, setImageAspectRatio] = useState(1);
+    const [season, setSeason] = useState("");
 
     //Tries to load saved image each time home screen is in focus
     useFocusEffect(
@@ -37,37 +40,48 @@ const HomeScreen = ({ navigation }) => {
         }
     }, [imageUri]);
 
+    //Tries to load saved season
+    useEffect(() => {
+        const loadSeason = async () => {
+            const savedSeason = await AsyncStorage.getItem("season");
+            if (savedSeason) {
+                setSeason(savedSeason);
+            }
+        };
+        loadSeason();
+    }, []);
+
     return (
         <ScrollView style={styles.scrollContainer}
             contentContainerStyle = {styles.scrollContent}
         >
             <View style={{width:appWidth}}>
-            <Text> 
-                Home screen
-            </Text>
-            {imageUri ? (
-                <Image
+            {season && <View>
+            <Text style={styles.headingText}>Your season is</Text>
+            <Text style={styles.headingItalicsText}>{season}</Text>
+            </View>}
+            
+            {imageUri && <Image
                 source={{ uri: imageUri }}
                 style={[styles.profileImage,{ aspectRatio: imageAspectRatio }]}
-                />
-            ) : (
-                <Text>No profile image saved</Text>
-            )}
-
-            <Text>
-                Filler information, put information about color season and examples of color palettes. Could put images of examples.
-            </Text>
+                />}
+            
+            {season && <View>
+            <ColorPalette title="Best Colors" colorData={seasonPalettes[getSeasonKey(season)].mainColors.slice(0,6)}></ColorPalette>
+            <ColorPalette title="Neutrals" colorData={seasonPalettes[getSeasonKey(season)].neutrals}></ColorPalette>
+            </View>}
+            
             <Pressable 
                 onPress={() => {
                     navigation.navigate("Analysis");
                     console.log('Button pressed!'); 
                 }}
                 style={({ pressed }) => [
-                    styles.button,
+                    styles.button, 
                     pressed && styles.buttonPressed
             ]}>
                 {({ pressed }) => (
-                    <Text>
+                    <Text style={styles.buttonText}>
                         Analyze my color season!
                     </Text>
                 )}
