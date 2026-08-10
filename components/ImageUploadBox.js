@@ -7,16 +7,17 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import {styles as globalStyles} from "../styles";
 
-export default function ImageUploadBox({ width, height,onImageSaved }) {
+export default function ImageUploadBox({ width, height, onImageSaved, imageKey = "profileImage", displayUri = null }) {
   const [imageUri, setImageUri] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [hasNewImage, setHasNewImage] = useState(false);
   const previousImage = useRef(null);
 
   //load saved previous image
   useFocusEffect(
     React.useCallback(() => {
       const loadPreviousImage = async () => {
-        const savedImage = await AsyncStorage.getItem("profileImage");
+        const savedImage = await AsyncStorage.getItem(imageKey);
 
         if (savedImage) {
           setImageUri(`${savedImage}?t=${Date.now()}`);
@@ -26,7 +27,7 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
 
       loadPreviousImage();
 
-    }, [])
+    }, [imageKey])
   );
 
   //Pick image from gallery
@@ -48,11 +49,13 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedUri = result.assets[0].uri;
 
-      // remember the old valid photo
+      //remember the old valid photo
       previousImage.current = imageUri;
 
-      // show new photo temporarily
+      //show new photo 
       setImageUri(selectedUri);
+
+      setHasNewImage(true);
     }
   };
 
@@ -72,11 +75,21 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
         console.log("Temporary image:", temporaryUri);
 
         if (onImageSaved) {
-            onImageSaved(
-                temporaryUri,
-                restorePreviousImage
-            );
-        }
+          await onImageSaved(
+              temporaryUri,
+              restorePreviousImage
+          );
+
+          setHasNewImage(false);
+
+          // Reload the permanently saved image
+          const savedImage = await AsyncStorage.getItem(imageKey);
+
+          if (savedImage) {
+              setImageUri(`${savedImage}?t=${Date.now()}`);
+              previousImage.current = savedImage;
+          }
+      }
 
     } catch(error) {
         console.log(error);
@@ -93,6 +106,13 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
     }
   };
 
+  //displays displayUri image if available
+  useEffect(() => {
+      if (displayUri) {
+          setImageUri(displayUri);
+      }
+  }, [displayUri]);
+
   
   return (
     <View style={styles.container}>
@@ -106,7 +126,7 @@ export default function ImageUploadBox({ width, height,onImageSaved }) {
         )}
       </TouchableOpacity>
 
-      {imageUri && (
+      {hasNewImage && (
         <TouchableOpacity 
           style={[globalStyles.button,{width},saving && styles.buttonDisabled]} 
           onPress={() => saveImage(imageUri)}

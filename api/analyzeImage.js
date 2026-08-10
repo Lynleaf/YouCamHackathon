@@ -1,6 +1,6 @@
 const API_KEY = "sk-ZHULp6Z4BM7jIVkQzYSElTZMK64svo4yiVycdn3F630hF7fcLYyE8Qz4A9nUS4iB";
 
-const BASE_URL = "https://yce-api-01.makeupar.com";
+const API_BASE = "https://yce-api-01.makeupar.com";
 import { File } from "expo-file-system";
 import { Blob } from "expo-blob";
 
@@ -25,6 +25,7 @@ export async function analyzeImage(uri) {
     console.log("Analysis results:", pollResults);
     return pollResults;
 }
+
 async function getUploadURL(uri) {
     const imageFile = new File(uri);
 
@@ -76,7 +77,7 @@ async function uploadImage(uploadUrl, imageUri, headers) {
 async function createSkinTask(fileId) {
 
     const response = await fetch(
-        `${BASE_URL}/s2s/v2.0/task/skin-analysis`,
+        `${API_BASE}/s2s/v2.0/task/skin-analysis`,
         {
             method: "POST",
 

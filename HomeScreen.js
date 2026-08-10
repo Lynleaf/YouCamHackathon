@@ -15,7 +15,7 @@ const HomeScreen = ({ navigation }) => {
     const [imageAspectRatio, setImageAspectRatio] = useState(1);
     const [season, setSeason] = useState("");
 
-    //Tries to load saved image each time home screen is in focus
+    //Tries to load saved profile image each time home screen is in focus
     useFocusEffect(
         React.useCallback(() => {
             const loadImage = async () => {

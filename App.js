@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './HomeScreen';
 import PaletteScreen from './PaletteScreen';
 import AnalysisScreen from './AnalysisScreen';
-import TryOnScreen from './TryOnScreen';
+import ClosetScreen from './ClosetScreen';
 import LooksScreen from './LooksScreen';
 
 import { useFonts } from "expo-font";
@@ -31,8 +31,8 @@ function TabNavigator() {
         component={LooksScreen}
       />
       <Tab.Screen
-        name="Try-On"
-        component={TryOnScreen}
+        name="Closet"
+        component={ClosetScreen}
       />
       <Tab.Screen
         name="Full Palette"

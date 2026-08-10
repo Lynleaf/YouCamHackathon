@@ -6,33 +6,12 @@ import {styles} from "./styles";
 import ImageUploadBox from './components/ImageUploadBox';
 import determineSeason from './utils/determineSeason';
 import { faceAnalysisErrors } from "./utils/faceAnalysisErrors";
+import { savePermanentImage } from "./utils/savePermanentImage";
 import {analyzeImage} from "./api/analyzeImage";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
 
-const savePermanentImage = async (uri) => {
-    const permanentUri =
-        FileSystem.documentDirectory + "profileImage.jpg";
-
-    const oldImage = await FileSystem.getInfoAsync(permanentUri);
-
-    if (oldImage.exists) {
-        await FileSystem.deleteAsync(permanentUri);
-    }
-
-    await FileSystem.copyAsync({
-        from: uri,
-        to: permanentUri
-    });
-
-    await AsyncStorage.setItem(
-        "profileImage",
-        permanentUri
-    );
-
-    return permanentUri;
-};
 
 const AnalysisScreen = ({ navigation }) => {
     const { width,height } = useWindowDimensions();
@@ -60,7 +39,7 @@ const AnalysisScreen = ({ navigation }) => {
                         analysis.color.skin_color
                     );
                     await AsyncStorage.setItem("season", season);
-                    await savePermanentImage(uri);
+                    await savePermanentImage(uri,"profileImage");
                     console.log("Season is: ",season);
                     
                     
