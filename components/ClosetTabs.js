@@ -4,49 +4,79 @@ import {
     Pressable,
     Text,
     StyleSheet,
+    ScrollView,
 } from "react-native";
 
 import { CLOTHING_TYPES } from "../utils/clothingTypesData";
+import { theme } from "../styles";
 
 export default function ClosetTabs({
     selected,
     onChange,
 }) {
     return (
-        <View style={styles.container}>
-            {CLOTHING_TYPES.map(type => (
-                <Pressable
-                    key={type.value}
-                    style={[
-                        styles.tab,
-                        selected === type.value &&
-                            styles.selected
-                    ]}
-                    onPress={() => onChange(type.value)}
-                >
-                    <Text>{type.label}</Text>
-                </Pressable>
-            ))}
-        </View>
+        <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ flexGrow: 0 }}
+            contentContainerStyle={styles.container}
+        >
+            {CLOTHING_TYPES.map(type => {
+                const isSelected = selected === type.value;
+                return (
+                    <Pressable
+                        key={type.value}
+                        style={[
+                            styles.tab,
+                            isSelected && styles.selected,
+                        ]}
+                        onPress={() => onChange(type.value)}
+                    >
+                        <Text
+                            style={[
+                                styles.tabText,
+                                isSelected && styles.selectedText,
+                            ]}
+                        >
+                            {type.label}
+                        </Text>
+                    </Pressable>
+                );
+            })}
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        flexWrap: "wrap",
-        marginBottom: 10,
+        alignItems: "center",
+        gap: theme.spacing.sm,
+        paddingVertical: 0,
     },
 
     tab: {
-        backgroundColor: "#EEE",
-        paddingHorizontal: 12,
+        backgroundColor: theme.colors.surface,
+        paddingHorizontal: theme.spacing.md,
         paddingVertical: 8,
-        margin: 4,
-        borderRadius: 20,
+        borderRadius: theme.radius.sm,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
 
     selected: {
-        backgroundColor: "#CCC",
+        backgroundColor: theme.colors.accent,
+        borderColor: theme.colors.accent,
+    },
+
+    tabText: {
+        color: theme.colors.textMuted,
+        fontFamily: theme.fonts.regular,
+        fontSize: 13,
+    },
+
+    selectedText: {
+        color: "#FFFFFF",
+        fontFamily: theme.fonts.bold,
     },
 });

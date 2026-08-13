@@ -1,19 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Alert, ActivityIndicator,useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from "expo-file-system/legacy";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
-import {styles as globalStyles} from "../styles";
+import { styles as globalStyles, theme } from "../styles";
+import LoadingOverlay from "./LoadingOverlay";
 
-export default function ImageUploadBox({ width, height, onImageSaved, imageKey = "profileImage", displayUri = null }) {
+export default function ImageUploadBox({
+  width,
+  height,
+  onImageSaved,
+  imageKey = "profileImage",
+  displayUri = null,
+  compact = false,
+  onSavingChange,
+  savingMessage = "Saving photo…",
+}) {
   const [imageUri, setImageUri] = useState(null);
   const [saving, setSaving] = useState(false);
   const [hasNewImage, setHasNewImage] = useState(false);
   const previousImage = useRef(null);
 
-  //load saved previous image
+  const updateSaving = (next) => {
+    setSaving(next);
+    onSavingChange?.(next);
+  };
+
   useFocusEffect(
     React.useCallback(() => {
       const loadPreviousImage = async () => {
@@ -26,117 +41,128 @@ export default function ImageUploadBox({ width, height, onImageSaved, imageKey =
       };
 
       loadPreviousImage();
-
     }, [imageKey])
   );
 
-  //Pick image from gallery
   const pickImage = async () => {
+    if (saving) return;
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'We need access to your photos to upload an image.');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], 
+      mediaTypes: ['images'],
       allowsEditing: true,
-      aspect: [Math.round(width), Math.round(height)], 
+      aspect: [Math.max(1, Math.round(width)), Math.max(1, Math.round(height))],
       quality: 1,
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedUri = result.assets[0].uri;
-
-      //remember the old valid photo
       previousImage.current = imageUri;
-
-      //show new photo 
       setImageUri(selectedUri);
-
       setHasNewImage(true);
     }
   };
 
-  //Saves image temporarily (before it is successfully analyzed)
   const saveImage = async (uri) => {
     try {
-        setSaving(true);
+      updateSaving(true);
 
-        const temporaryUri =
-            FileSystem.documentDirectory + `temp_${Date.now()}.jpg`;
+      const temporaryUri =
+        FileSystem.documentDirectory + `temp_${Date.now()}.jpg`;
 
-        await FileSystem.copyAsync({
-            from: uri,
-            to: temporaryUri,
-        });
+      await FileSystem.copyAsync({
+        from: uri,
+        to: temporaryUri,
+      });
 
-        console.log("Temporary image:", temporaryUri);
+      console.log("Temporary image:", temporaryUri);
 
-        if (onImageSaved) {
-          await onImageSaved(
-              temporaryUri,
-              restorePreviousImage
-          );
+      if (onImageSaved) {
+        await onImageSaved(
+          temporaryUri,
+          restorePreviousImage
+        );
 
-          setHasNewImage(false);
+        setHasNewImage(false);
 
-          // Reload the permanently saved image
-          const savedImage = await AsyncStorage.getItem(imageKey);
+        const savedImage = await AsyncStorage.getItem(imageKey);
 
-          if (savedImage) {
-              setImageUri(`${savedImage}?t=${Date.now()}`);
-              previousImage.current = savedImage;
-          }
+        if (savedImage) {
+          setImageUri(`${savedImage}?t=${Date.now()}`);
+          previousImage.current = savedImage;
+        }
       }
-
-    } catch(error) {
-        console.log(error);
-        Alert.alert("Error", "Could not save image");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Could not save image");
     } finally {
-        setSaving(false);
+      updateSaving(false);
     }
-};
+  };
 
-  //restores previous successfully analyzed image
   const restorePreviousImage = () => {
     if (previousImage.current) {
       setImageUri(previousImage.current);
     }
   };
 
-  //displays displayUri image if available
   useEffect(() => {
-      if (displayUri) {
-          setImageUri(displayUri);
-      }
+    if (displayUri) {
+      setImageUri(displayUri);
+    }
   }, [displayUri]);
 
-  
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={[styles.uploadBox,{width,height}]} onPress={pickImage}>
+    <View style={[styles.container, compact && styles.containerCompact]}>
+      <LoadingOverlay visible={saving && !onSavingChange} message={savingMessage} />
+
+      <TouchableOpacity
+        style={[styles.uploadBox, { width, height }]}
+        onPress={pickImage}
+        activeOpacity={0.85}
+        disabled={saving}
+      >
         {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.previewImage} />
+          <>
+            <Image source={{ uri: imageUri }} style={styles.previewImage} />
+            <View style={styles.changeHint}>
+              <Ionicons name="camera-outline" size={14} color="#FFFFFF" />
+              <Text style={styles.changeHintText}>Tap to change</Text>
+            </View>
+          </>
         ) : (
           <View style={styles.placeholderContainer}>
-            <Text style={styles.uploadText}>Tap to select an image from your gallery</Text>
+            <Ionicons
+              name="image-outline"
+              size={28}
+              color={theme.colors.textDim}
+              style={{ marginBottom: theme.spacing.sm }}
+            />
+            <Text style={styles.uploadText}>
+              Tap to select a photo from your gallery
+            </Text>
           </View>
         )}
       </TouchableOpacity>
 
       {hasNewImage && (
-        <TouchableOpacity 
-          style={[globalStyles.button,{width},saving && styles.buttonDisabled]} 
+        <TouchableOpacity
+          style={[
+            globalStyles.button,
+            { width, marginTop: theme.spacing.sm },
+            saving && styles.buttonDisabled,
+          ]}
           onPress={() => saveImage(imageUri)}
           disabled={saving}
+          activeOpacity={0.8}
         >
-          {saving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={globalStyles.buttonText}>Save Image</Text>
-          )}
+          <Text style={globalStyles.buttonText}>Save Image</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -145,36 +171,59 @@ export default function ImageUploadBox({ width, height, onImageSaved, imageKey =
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  containerCompact: {
+    paddingVertical: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
   },
   uploadBox: {
-    backgroundColor: "#4A4e69",
-    borderWidth: 2,
-    borderColor: '#646678',
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
     borderStyle: 'dashed',
-    borderRadius: 20, 
-    margin:20,
+    borderRadius: theme.radius.lg,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
   },
   placeholderContainer: {
     alignItems: 'center',
+    paddingHorizontal: theme.spacing.xl,
   },
   uploadText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.regular,
+    textAlign: 'center',
+    lineHeight: 21,
   },
   previewImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  buttonDisabled: {
-    backgroundColor: '#a0c4ff',
+  changeHint: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(28, 25, 23, 0.72)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: theme.radius.sm,
   },
- 
+  changeHintText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontFamily: theme.fonts.regular,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
 });

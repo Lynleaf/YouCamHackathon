@@ -1,25 +1,29 @@
 import React from "react";
-import {Image,Pressable,StyleSheet,Text,View} from "react-native";
-import { Dimensions } from "react-native";
+import { Image, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "../styles";
 
 const SPACING = 8;
 const NUM_COLUMNS = 3;
-
-const ITEM_SIZE =
-    (Dimensions.get("window").width -
-        SPACING * (NUM_COLUMNS + 1)) /
-    NUM_COLUMNS;
+const HORIZONTAL_PADDING = 40;
 
 export default function ClosetItem({
     item,
     onRemove,
     onPress,
 }) {
-    return (
-        <View style={styles.container}>
+    const { width } = useWindowDimensions();
+    const itemSize =
+        (width - HORIZONTAL_PADDING - SPACING * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
 
+    return (
+        <View style={[styles.container, { width: itemSize, height: itemSize }]}>
             <Pressable
                 onPress={() => onPress(item)}
+                style={({ pressed }) => [
+                    styles.pressable,
+                    pressed && { opacity: 0.85 },
+                ]}
             >
                 <Image
                     source={{ uri: item.image }}
@@ -27,27 +31,34 @@ export default function ClosetItem({
                 />
             </Pressable>
 
-
             <Pressable
                 style={styles.heartButton}
                 onPress={() => onRemove(item)}
+                accessibilityLabel="Remove from closet"
             >
-                <Text style={styles.heart}>
-                    ❤️
-                </Text>
+                <Ionicons
+                    name="heart"
+                    size={16}
+                    color={theme.colors.danger}
+                />
             </Pressable>
-
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        width: ITEM_SIZE,
-        height: ITEM_SIZE,
-        margin: SPACING / 2,
-        borderRadius: 12,
+        marginBottom: SPACING,
+        borderRadius: theme.radius.md,
         overflow: "hidden",
+        backgroundColor: theme.colors.surface,
+        borderWidth: 1,
+        borderColor: theme.colors.borderMuted,
+    },
+
+    pressable: {
+        width: "100%",
+        height: "100%",
     },
 
     image: {
@@ -56,17 +67,15 @@ const styles = StyleSheet.create({
     },
     heartButton: {
         position: "absolute",
-        top: 8,
-        right: 8,
-        backgroundColor: "rgba(255,255,255,0.8)",
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        top: 6,
+        right: 6,
+        backgroundColor: theme.colors.surface,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         justifyContent: "center",
         alignItems: "center",
-    },
-
-    heart: {
-        fontSize: 20,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
 });

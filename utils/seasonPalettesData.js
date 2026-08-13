@@ -320,9 +320,24 @@ export const seasonPalettes = {
 };
 
 export function getSeasonKey(season) {
-  
+  if (!season) return null;
+
+  const aliases = {
+    "Dark Autumn": "deepAutumn",
+    "Dark Winter": "deepWinter",
+    "Bright Winter": "coolWinter",
+    "Deep Autumn": "deepAutumn",
+    "Deep Winter": "deepWinter",
+    "Cool Winter": "coolWinter",
+  };
+
+  if (aliases[season]) {
+    return aliases[season];
+  }
+
   const key = season
     .replace(" ", "")
     .replace(/^./, (char) => char.toLowerCase());
+
   return key;
-};
+}

@@ -1,15 +1,28 @@
 import React, { useState, useEffect } from "react";
-import {View,Text,Pressable,FlatList,StyleSheet} from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "../styles";
 
 export default function ColorPicker({
     palette,
     selectedColors,
-    setSelectedColors
+    setSelectedColors,
+    open,
+    onOpenChange,
 }) {
-    const [open, setOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
     const [colorGroup, setColorGroup] = useState("main");
-    
-    //make previously selected colors not show
+
+    const isControlled = typeof open === "boolean";
+    const isOpen = isControlled ? open : internalOpen;
+
+    const setOpen = (next) => {
+        if (!isControlled) {
+            setInternalOpen(next);
+        }
+        onOpenChange?.(next);
+    };
+
     useEffect(() => {
         if (!palette) return;
 
@@ -25,9 +38,8 @@ export default function ColorPicker({
         );
     }, [colorGroup, palette]);
 
-    //get colors based group selected
     const colors = palette ? (colorGroup === "main" ? palette.mainColors : palette.neutrals) : [];
-    if (!palette || colors.length === 0) {return null;}
+    if (!palette || colors.length === 0) { return null; }
 
     const toggleColor = (color) => {
         const exists = selectedColors.some(c => c.name === color.name);
@@ -46,14 +58,12 @@ export default function ColorPicker({
 
     return (
         <View style={styles.container}>
-
-            {/* Header */}
             <Pressable
                 style={styles.selected}
-                onPress={() => setOpen(!open)}
+                onPress={() => setOpen(!isOpen)}
             >
                 {selectedColors.length === 0 ? (
-                    <Text>Select Colors</Text>
+                    <Text style={styles.placeholder}>Select colors</Text>
                 ) : (
                     <View style={styles.selectedRow}>
                         {selectedColors.slice(0, 5).map(color => (
@@ -63,9 +73,9 @@ export default function ColorPicker({
                                     styles.circle,
                                     {
                                         backgroundColor: color.hex,
-                                        marginRight: -8, // overlap circles
+                                        marginRight: -8,
                                         borderWidth: 2,
-                                        borderColor: "white",
+                                        borderColor: theme.colors.surface,
                                     }
                                 ]}
                             />
@@ -77,14 +87,19 @@ export default function ColorPicker({
                             </Text>
                         )}
 
-                        <Text style={styles.arrow}>
-                            ▼
+                        <Text style={styles.selectedCount}>
+                            {selectedColors.length} selected
                         </Text>
                     </View>
                 )}
+                <Ionicons
+                    name={isOpen ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color={theme.colors.textMuted}
+                />
             </Pressable>
 
-            {open && (
+            {isOpen && (
                 <View style={styles.dropdown}>
                     <View style={styles.groupSelector}>
                         <Pressable
@@ -94,7 +109,12 @@ export default function ColorPicker({
                             ]}
                             onPress={() => setColorGroup("main")}
                         >
-                            <Text>Main Colors</Text>
+                            <Text style={[
+                                styles.groupText,
+                                colorGroup === "main" && styles.activeGroupText,
+                            ]}>
+                                Main Colors
+                            </Text>
                         </Pressable>
 
                         <Pressable
@@ -104,25 +124,34 @@ export default function ColorPicker({
                             ]}
                             onPress={() => setColorGroup("neutral")}
                         >
-                            <Text>Neutrals</Text>
+                            <Text style={[
+                                styles.groupText,
+                                colorGroup === "neutral" && styles.activeGroupText,
+                            ]}>
+                                Neutrals
+                            </Text>
                         </Pressable>
                     </View>
 
-                    <FlatList
-                        data={colors}
-                        keyExtractor={(item) => item.name}
-                        renderItem={({ item }) => {
-
+                    <ScrollView
+                        style={styles.optionsList}
+                        nestedScrollEnabled
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {colors.map((item) => {
                             const selected = selectedColors.some(
                                 c => c.name === item.name
                             );
 
                             return (
                                 <Pressable
-                                    style={styles.option}
+                                    key={item.name}
+                                    style={[
+                                        styles.option,
+                                        selected && styles.optionSelected,
+                                    ]}
                                     onPress={() => toggleColor(item)}
                                 >
-
                                     <View
                                         style={[
                                             styles.circle,
@@ -130,20 +159,21 @@ export default function ColorPicker({
                                         ]}
                                     />
 
-                                    <Text style={{ flex: 1 }}>
+                                    <Text style={styles.optionText}>
                                         {item.name}
                                     </Text>
 
                                     {selected && (
-                                        <Text style={styles.check}>
-                                            ✓
-                                        </Text>
+                                        <Ionicons
+                                            name="checkmark"
+                                            size={18}
+                                            color={theme.colors.accent}
+                                        />
                                     )}
-
                                 </Pressable>
                             );
-                        }}
-                    />
+                        })}
+                    </ScrollView>
 
                     <Pressable
                         style={styles.doneButton}
@@ -153,95 +183,138 @@ export default function ColorPicker({
                             Done
                         </Text>
                     </Pressable>
-
                 </View>
             )}
-
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        width: 220,
+        width: "100%",
     },
 
     selected: {
         flexDirection: "row",
         alignItems: "center",
+        backgroundColor: theme.colors.surface,
         borderWidth: 1,
-        borderRadius: 10,
-        padding: 10,
-        minHeight: 50,
+        borderColor: theme.colors.border,
+        borderRadius: theme.radius.md,
+        padding: theme.spacing.md,
+        minHeight: 52,
+    },
+
+    placeholder: {
+        color: theme.colors.textDim,
+        fontFamily: theme.fonts.regular,
+        fontSize: 15,
+        flex: 1,
     },
 
     dropdown: {
-        position: "absolute",
-        top: 55,
+        marginTop: theme.spacing.sm,
         width: "100%",
-        maxHeight: 300,
-        backgroundColor: "white",
+        backgroundColor: theme.colors.surface,
         borderWidth: 1,
-        borderRadius: 10,
-        zIndex: 10,
+        borderColor: theme.colors.border,
+        borderRadius: theme.radius.md,
+        overflow: "hidden",
+    },
+
+    optionsList: {
+        maxHeight: 220,
     },
 
     option: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 10,
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: 12,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.divider,
+    },
+
+    optionSelected: {
+        backgroundColor: theme.colors.surfaceElevated,
+    },
+
+    optionText: {
+        flex: 1,
+        color: theme.colors.text,
+        fontFamily: theme.fonts.regular,
+        fontSize: 14,
     },
 
     circle: {
         width: 22,
         height: 22,
         borderRadius: 11,
-        marginRight: 10,
+        marginRight: theme.spacing.sm,
         borderWidth: 1,
-        borderColor: "#999",
-    },
-
-    check: {
-        fontSize: 18,
-        fontWeight: "bold",
+        borderColor: theme.colors.border,
     },
 
     doneButton: {
-        padding: 12,
+        padding: theme.spacing.md,
         alignItems: "center",
         borderTopWidth: 1,
+        borderTopColor: theme.colors.divider,
+        backgroundColor: theme.colors.accent,
     },
 
     doneText: {
-        fontWeight: "600",
+        fontFamily: theme.fonts.bold,
+        color: "#FFFFFF",
+        fontSize: 15,
     },
     selectedRow: {
         flexDirection: "row",
         alignItems: "center",
+        flex: 1,
     },
 
     moreText: {
         marginLeft: 12,
-        fontWeight: "600",
+        fontFamily: theme.fonts.bold,
+        color: theme.colors.textMuted,
+        fontSize: 13,
     },
 
-    arrow: {
-        marginLeft: "auto",
-        fontSize: 12,
+    selectedCount: {
+        marginLeft: 12,
+        fontFamily: theme.fonts.regular,
+        color: theme.colors.textMuted,
+        fontSize: 13,
     },
+
     groupSelector: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderColor: "#DDD",
+        flexDirection: "row",
+        borderBottomWidth: 1,
+        borderColor: theme.colors.divider,
+        backgroundColor: theme.colors.surfaceElevated,
     },
 
     groupButton: {
         flex: 1,
-        paddingVertical: 10,
+        paddingVertical: 12,
         alignItems: "center",
     },
 
     activeGroup: {
-        backgroundColor: "#F2F2F2",
+        backgroundColor: theme.colors.surface,
+        borderBottomWidth: 2,
+        borderBottomColor: theme.colors.accent,
+    },
+
+    groupText: {
+        color: theme.colors.textDim,
+        fontFamily: theme.fonts.regular,
+        fontSize: 13,
+    },
+
+    activeGroupText: {
+        color: theme.colors.text,
+        fontFamily: theme.fonts.bold,
     },
 });

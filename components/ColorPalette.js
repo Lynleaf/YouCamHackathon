@@ -1,11 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-import {styles as globalStyles} from "../styles";
+import { styles as globalStyles, theme } from "../styles";
+
 export default function ColorPalette({ title, colorData = [] }) {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.bodyTextLarge}>{title}</Text>
+      <View style={styles.rule} />
 
       <View style={styles.grid}>
         {colorData.map((color) => (
@@ -18,7 +20,10 @@ export default function ColorPalette({ title, colorData = [] }) {
             />
 
             <View style={styles.textContainer}>
-              <Text style={globalStyles.bodyTextMed}>{color.name}</Text>
+              <Text style={globalStyles.bodyTextMed} numberOfLines={2}>
+                {color.name}
+              </Text>
+              <Text style={globalStyles.bodyTextSmall}>{color.hex}</Text>
             </View>
           </View>
         ))}
@@ -26,13 +31,22 @@ export default function ColorPalette({ title, colorData = [] }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: "#2d2d4e",
-    borderRadius: 16,
-    padding: 10,
-    marginVertical:10
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing.lg,
+    marginVertical: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.borderMuted,
+  },
+
+  rule: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: theme.colors.divider,
+    marginBottom: theme.spacing.md,
   },
 
   grid: {
@@ -42,27 +56,22 @@ const styles = StyleSheet.create({
   },
 
   item: {
-    width: "48%", // Two per row with a little spacing
+    width: "48%",
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
 
   colorSquare: {
     width: 40,
     height: 40,
-    borderRadius: 6,
+    borderRadius: theme.radius.sm,
     borderWidth: 1,
-    borderColor: "#DDD",
-    marginRight: 10,
+    borderColor: theme.colors.border,
+    marginRight: theme.spacing.sm,
   },
 
   textContainer: {
     flex: 1,
-  },
-  description: {
-    marginTop: 2,
-    fontSize: 14,
-    color: "#DDD",
   },
 });

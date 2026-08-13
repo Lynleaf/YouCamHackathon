@@ -1,9 +1,10 @@
 import React from "react";
-import { FlatList } from "react-native";
+import { FlatList, Text, View } from "react-native";
 
 import ClosetItem from "./ClosetItem";
+import { styles as globalStyles, theme } from "../styles";
 
-export default function ClosetGrid({clothes,onRemove,onPress}) {
+export default function ClosetGrid({ clothes, onRemove, onPress }) {
     return (
         <FlatList
             data={clothes}
@@ -16,9 +17,17 @@ export default function ClosetGrid({clothes,onRemove,onPress}) {
                     onRemove={onRemove}
                 />
             )}
-            style={{
-                maxHeight: 120, 
-            }}
+            ListEmptyComponent={
+                <View style={[globalStyles.emptyState, { paddingVertical: theme.spacing.lg }]}>
+                    <Text style={globalStyles.emptyStateTitle}>No saved pieces yet</Text>
+                    <Text style={globalStyles.emptyStateText}>
+                        Heart items from Looks to add them here.
+                    </Text>
+                </View>
+            }
+            contentContainerStyle={{ paddingBottom: 24, paddingTop: 0, flexGrow: 1 }}
+            columnWrapperStyle={clothes.length ? { gap: theme.spacing.sm } : undefined}
+            style={{ flex: 1 }}
         />
     );
 }
