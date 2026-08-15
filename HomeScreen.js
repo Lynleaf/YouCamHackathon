@@ -57,7 +57,7 @@ const HomeScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.screen} edges={["top", "left", "right"]}>
             <View style={styles.heading}>
-                <Text style={styles.headingText}>YouCam</Text>
+                <Text style={styles.headingText}>SeeOn</Text>
                 <Text style={styles.headingSubtext}>
                     Personal color analysis and wardrobe guidance
                 </Text>
