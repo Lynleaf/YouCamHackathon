@@ -100,7 +100,7 @@ Personal color analysis has traditionally required:
 
 YouCam turns this into:
 
-> ** One photo → AI analysis → Personalized colors**
+** One photo → AI analysis → Personalized colors**
 
 ---
 
