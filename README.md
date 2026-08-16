@@ -100,14 +100,14 @@ Personal color analysis has traditionally required:
 
 YouCam turns this into:
 
-** One photo → AI analysis → Personalized colors**
+**One photo → AI analysis → Personalized colors**
 
 ---
 
 ## Screenshots
-<img width="1080" height="2316" alt="1000019165" src="https://github.com/user-attachments/assets/1c778088-7e32-4b2f-a546-6c42194a3bef" />
-<img width="1080" height="2316" alt="1000019161" src="https://github.com/user-attachments/assets/63a9ce40-de67-4c47-94ff-acbb720775c9" />
-<img width="1080" height="2316" alt="1000019160" src="https://github.com/user-attachments/assets/1ff2b64b-28e2-426b-9eef-703a60cbc6d4" />
+<img width="270" height="579" alt="1000019165" src="https://github.com/user-attachments/assets/1c778088-7e32-4b2f-a546-6c42194a3bef" />
+<img width="270" height="579" alt="1000019161" src="https://github.com/user-attachments/assets/63a9ce40-de67-4c47-94ff-acbb720775c9" />
+<img width="270" height="579" alt="1000019160" src="https://github.com/user-attachments/assets/1ff2b64b-28e2-426b-9eef-703a60cbc6d4" />
 
 ## 👩‍💻 Built For
 **YouCam Hackathon**
